@@ -513,6 +513,7 @@ class EuroSat(SatelliteDataset):
         super().__init__(13)
         with open(file_path, 'r') as f:
             data = f.read().splitlines()
+        print(data)
         self.img_paths = [row.split()[0] for row in data]
         self.labels = [int(row.split()[1]) for row in data]
 
