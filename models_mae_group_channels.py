@@ -38,8 +38,9 @@ class MaskedAutoencoderGroupChannelViT(nn.Module):
         num_patches = self.patch_embed[0].num_patches
 
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim - channel_embed),
-                                      requires_grad=False)  # fixed sin-cos embedding
+        # self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim - channel_embed),
+        #                               requires_grad=False)  # fixed sin-cos embedding
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim),  requires_grad=False)
         self.channel_embed = nn.Parameter(torch.zeros(1, num_groups, channel_embed), requires_grad=False)
         # self.enc_mask_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
 
@@ -55,8 +56,11 @@ class MaskedAutoencoderGroupChannelViT(nn.Module):
 
         self.mask_token = nn.Parameter(torch.zeros(1, 1, decoder_embed_dim))
 
+        # self.decoder_pos_embed = nn.Parameter(
+        #     torch.zeros(1, num_patches + 1, decoder_embed_dim - decoder_channel_embed),
+        #     requires_grad=False)  # fixed sin-cos embedding
         self.decoder_pos_embed = nn.Parameter(
-            torch.zeros(1, num_patches + 1, decoder_embed_dim - decoder_channel_embed),
+            torch.zeros(1, num_patches + 1, decoder_embed_dim),
             requires_grad=False)  # fixed sin-cos embedding
         # Extra channel for decoder to represent special place for cls token
         self.decoder_channel_embed = nn.Parameter(torch.zeros(1, num_groups + 1, decoder_channel_embed),
