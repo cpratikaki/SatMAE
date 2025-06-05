@@ -541,7 +541,7 @@ class EuroSat(SatelliteDataset):
     def __getitem__(self, idx):
         img_path, label = self.img_paths[idx], self.labels[idx]
         img = self.open_image(img_path)  # (h, w, c)
-        img=img[:,:,10]
+        
         if self.masked_bands is not None:
             img[:, :, self.masked_bands] = np.array(self.mean)[self.masked_bands]
 
