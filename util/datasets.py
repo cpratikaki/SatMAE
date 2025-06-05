@@ -493,7 +493,13 @@ class SentinelIndividualImageDataset(SatelliteDataset):
 
         return transforms.Compose(t)
 
+import pandas as pd
 
+class_map = {
+    'AnnualCrop': 0, 'Forest': 1, 'HerbaceousVegetation': 2,
+    'Highway': 3, 'Industrial': 4, 'Pasture': 5,
+    'PermanentCrop': 6, 'Residential': 7, 'River': 8, 'SeaLake': 9
+}
 class EuroSat(SatelliteDataset):
     mean = [1370.19151926, 1184.3824625, 1120.77120066, 1136.26026392,
             1263.73947144, 1645.40315151, 1846.87040806, 1762.59530783,
@@ -511,14 +517,13 @@ class EuroSat(SatelliteDataset):
         :param dropped_bands:  List of indices corresponding to which bands to drop from input image tensor
         """
         super().__init__(13)
-        with open(file_path, 'r') as f:
-            data = f.read().splitlines()
-        print(data)
-        self.img_paths = [row.split()[0] for row in data]
-        self.labels = [int(row.split()[1]) for row in data]
+
+        # Load CSV with pandas to handle commas safely
+        df = pd.read_csv(file_path)
+        self.img_paths = df['path'].tolist()
+        self.labels = [class_map[label] for label in df['class']]
 
         self.transform = transform
-
         self.masked_bands = masked_bands
         self.dropped_bands = dropped_bands
         if self.dropped_bands is not None:
