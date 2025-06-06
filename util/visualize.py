@@ -6,6 +6,26 @@ import os
 
 import torchvision.utils as vutils
 from torchvision.transforms.functional import to_pil_image
+import torch
+
+def denormalize(tensor, mean, std):
+    """
+    Denormalize a tensor with shape [C, H, W] using per-channel mean and std,
+    then scale to 0-255.
+    """
+    mean = torch.tensor(mean).view(-1, 1, 1).to(tensor.device)
+    std = torch.tensor(std).view(-1, 1, 1).to(tensor.device)
+    return (tensor * std + mean) / 255.0
+
+# Denormalization values
+mean = [1370.19151926, 1184.3824625, 1120.77120066, 1136.26026392,
+        1263.73947144, 1645.40315151, 1846.87040806, 1762.59530783,
+        1972.62420416, 582.72633433, 14.77112979, 1732.16362238, 1247.91870117]
+
+std = [633.15169573, 650.2842772, 712.12507725, 965.23119807,
+       948.9819932, 1108.06650639, 1258.36394548, 1233.1492281,
+       1364.38688993, 472.37967789, 14.3114637, 1310.36996126, 1087.6020813]
+
 
 def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_wandb=True):
     imgs = []
@@ -14,13 +34,25 @@ def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_
         panels = []
 
         # RGB: [0, 1, 2]
-        rgb_orig = original[i, [0, 1, 2]].cpu().clamp(0, 1)
-        rgb_recon = reconstructed[i, [0, 1, 2]].cpu().clamp(0, 1)
+        # rgb_orig = original[i, [0, 1, 2]].cpu().clamp(0, 1)
+        # rgb_recon = reconstructed[i, [0, 1, 2]].cpu().clamp(0, 1)
+        # RGB (bands 0,1,2)
+        rgb_orig = denormalize(original[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
+        rgb_recon = denormalize(reconstructed[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
+
         panels.append(torch.cat([rgb_orig, rgb_recon], dim=-1))
 
         # NIR: [3, 4, 5]
-        nir_orig = original[i, [3, 4, 5]].cpu().clamp(0, 1)
-        nir_recon = reconstructed[i, [3, 4, 5]].cpu().clamp(0, 1)
+        # nir_orig = original[i, [3, 4, 5]].cpu().clamp(0, 1)
+        # nir_recon = reconstructed[i, [3, 4, 5]].cpu().clamp(0, 1)
+        # NIR: bands [3, 4, 5]
+        nir_orig = denormalize(original[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
+        nir_recon = denormalize(reconstructed[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
+
+        # SWIR: band 8
+        swir_orig = denormalize(original[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
+        swir_recon = denormalize(reconstructed[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
+
         panels.append(torch.cat([nir_orig, nir_recon], dim=-1))
 
         # SWIR: [8] – single channel, grayscale
