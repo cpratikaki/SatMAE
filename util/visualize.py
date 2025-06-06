@@ -27,7 +27,10 @@ def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_
         swir_orig = original[i, 8].unsqueeze(0).cpu().clamp(0, 1)
         swir_recon = reconstructed[i, 8].unsqueeze(0).cpu().clamp(0, 1)
         panels.append(torch.cat([swir_orig, swir_recon], dim=-1))
-
+        print(len(panels))
+        print(panels[0].shape)
+        print(panels[1].shape)
+        print(panels[2].shape)
         # Stack vertically: RGB, NIR, SWIR (all on CPU)
         stacked = torch.cat(panels, dim=1)
         imgs.append(stacked)
