@@ -251,6 +251,8 @@ def main(args):
                 p = h * w
                 # p = (args.input_size // args.patch_size) ** 2  # total number of patches per group
                 c = [len(group) for group in args.grouped_bands]  # e.g., [4, 4, 2] or similar
+                print("p,c", p ,c)
+                print(pred.shape, 'PRED SHAPE')
 
                 reconstructed = model.unpatchify(pred, p=p, c=c).detach()  # full image
 
