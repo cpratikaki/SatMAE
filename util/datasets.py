@@ -356,9 +356,10 @@ class SentinelNormalize:
         self.std = np.array(std)
 
     def __call__(self, x, *args, **kwargs):
+        x = x / 4096.0
         min_value = self.mean - 2 * self.std
         max_value = self.mean + 2 * self.std
-        img = (x - min_value) / (max_value - min_value) * 255.0 / 4096.0
+        img = (x - min_value) / (max_value - min_value) * 255.0 
         img = np.clip(img, 0, 255).astype(np.uint8)
         return img
 
