@@ -29,46 +29,67 @@ std = [633.15169573, 650.2842772, 712.12507725, 965.23119807,
 
 def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_wandb=True):
     imgs = []
-
     for i in range(original.shape[0]):  # Loop over 4 images
-        panels = []
-
-        # RGB: [0, 1, 2]
-        # rgb_orig = original[i, [0, 1, 2]].cpu().clamp(0, 1)
-        # rgb_recon = reconstructed[i, [0, 1, 2]].cpu().clamp(0, 1)
-        # RGB (bands 0,1,2)
+        # RGB
         rgb_orig = denormalize(original[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
         rgb_recon = denormalize(reconstructed[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
 
-        panels.append(torch.cat([rgb_orig, rgb_recon], dim=-1))
+        to_pil_image(rgb_orig).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb_orig.png"))
+        to_pil_image(rgb_recon).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb_recon.png"))
 
-        # NIR: [3, 4, 5]
-        # nir_orig = original[i, [3, 4, 5]].cpu().clamp(0, 1)
-        # nir_recon = reconstructed[i, [3, 4, 5]].cpu().clamp(0, 1)
-        # NIR: bands [3, 4, 5]
+        # NIR
         nir_orig = denormalize(original[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
         nir_recon = denormalize(reconstructed[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
 
-        # SWIR: band 8
+        to_pil_image(nir_orig).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir_orig.png"))
+        to_pil_image(nir_recon).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir_recon.png"))
+
+        # SWIR
         swir_orig = denormalize(original[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
         swir_recon = denormalize(reconstructed[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
 
-        panels.append(torch.cat([nir_orig, nir_recon], dim=-1))
+        to_pil_image(swir_orig).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir_orig.png"))
+        to_pil_image(swir_recon).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir_recon.png"))
 
-        # SWIR: [8] – single channel, grayscale
-        swir_orig = original[i, 8].unsqueeze(0).cpu().clamp(0, 1)
-        swir_recon = reconstructed[i, 8].unsqueeze(0).cpu().clamp(0, 1)
-        panels.append(torch.cat([swir_orig, swir_recon], dim=-1))
-        print(len(panels))
-        print(panels[0].shape)
-        print(panels[1].shape)
-        print(panels[2].shape)
-        rgb_grid = vutils.make_grid([rgb_orig, rgb_recon], nrow=2, normalize=True)
-        vutils.save_image(rgb_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb.png"))
-        nir_grid = vutils.make_grid([nir_orig, nir_recon], nrow=2, normalize=True)
-        vutils.save_image(nir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir.png"))
-        swir_grid = vutils.make_grid([swir_orig, swir_recon], nrow=2, normalize=True)
-        vutils.save_image(swir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir.png"))
+    # for i in range(original.shape[0]):  # Loop over 4 images
+    #     panels = []
+
+    #     # RGB: [0, 1, 2]
+    #     # rgb_orig = original[i, [0, 1, 2]].cpu().clamp(0, 1)
+    #     # rgb_recon = reconstructed[i, [0, 1, 2]].cpu().clamp(0, 1)
+    #     # RGB (bands 0,1,2)
+    #     rgb_orig = denormalize(original[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
+    #     rgb_recon = denormalize(reconstructed[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
+
+    #     panels.append(torch.cat([rgb_orig, rgb_recon], dim=-1))
+
+    #     # NIR: [3, 4, 5]
+    #     # nir_orig = original[i, [3, 4, 5]].cpu().clamp(0, 1)
+    #     # nir_recon = reconstructed[i, [3, 4, 5]].cpu().clamp(0, 1)
+    #     # NIR: bands [3, 4, 5]
+    #     nir_orig = denormalize(original[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
+    #     nir_recon = denormalize(reconstructed[i, [3, 4, 5]].cpu(), mean[3:6], std[3:6]).clamp(0, 1)
+
+    #     # SWIR: band 8
+    #     swir_orig = denormalize(original[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
+    #     swir_recon = denormalize(reconstructed[i, 8].unsqueeze(0).cpu(), [mean[8]], [std[8]]).clamp(0, 1)
+
+    #     panels.append(torch.cat([nir_orig, nir_recon], dim=-1))
+
+    #     # SWIR: [8] – single channel, grayscale
+    #     swir_orig = original[i, 8].unsqueeze(0).cpu().clamp(0, 1)
+    #     swir_recon = reconstructed[i, 8].unsqueeze(0).cpu().clamp(0, 1)
+    #     panels.append(torch.cat([swir_orig, swir_recon], dim=-1))
+    #     print(len(panels))
+    #     print(panels[0].shape)
+    #     print(panels[1].shape)
+    #     print(panels[2].shape)
+    #     rgb_grid = vutils.make_grid([rgb_orig, rgb_recon], nrow=2, normalize=True)
+    #     vutils.save_image(rgb_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb.png"))
+    #     nir_grid = vutils.make_grid([nir_orig, nir_recon], nrow=2, normalize=True)
+    #     vutils.save_image(nir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir.png"))
+    #     swir_grid = vutils.make_grid([swir_orig, swir_recon], nrow=2, normalize=True)
+    #     vutils.save_image(swir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir.png"))
         # Stack vertically: RGB, NIR, SWIR (all on CPU)
     #     stacked = torch.cat(panels, dim=1)
     #     imgs.append(stacked)
