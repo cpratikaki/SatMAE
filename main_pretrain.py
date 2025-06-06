@@ -276,10 +276,10 @@ def main(args):
             with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
 
-            try:
-                wandb.log(log_stats)
-            except ValueError:
-                print(f"Invalid stats?")
+            # try:
+            #     wandb.log(log_stats)
+            # except ValueError:
+            #     print(f"Invalid stats?")
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
