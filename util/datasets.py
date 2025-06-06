@@ -547,8 +547,10 @@ class EuroSat(SatelliteDataset):
             img[:, :, self.masked_bands] = np.array(self.mean)[self.masked_bands]
 
         img_as_tensor = self.transform(img)  # (c, h, w)
+
         if self.dropped_bands is not None:
             keep_idxs = [i for i in range(img_as_tensor.shape[0]) if i not in self.dropped_bands]
+            print(keep_idxs)
             img_as_tensor = img_as_tensor[keep_idxs, :, :]
 
         return img_as_tensor, label
