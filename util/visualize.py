@@ -31,8 +31,12 @@ def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_
     imgs = []
     for i in range(original.shape[0]):  # Loop over 4 images
         # RGB
+        nnorm = (original[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
         rgb_orig = denormalize(original[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
         rgb_recon = denormalize(reconstructed[i, [0, 1, 2]].cpu(), mean[:3], std[:3]).clamp(0, 1)
+        print("RGB original min/max:", rgb_orig.min(), rgb_orig.max())
+        print("nnorm original min/max:", nnorm.min(), nnorm.max())
+
 
         to_pil_image(rgb_orig).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb_orig.png"))
         to_pil_image(rgb_recon).save(os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb_recon.png"))
