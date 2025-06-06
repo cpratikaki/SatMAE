@@ -15,7 +15,7 @@ def denormalize(tensor, mean, std):
     """
     mean = torch.tensor(mean).view(-1, 1, 1).to(tensor.device)
     std = torch.tensor(std).view(-1, 1, 1).to(tensor.device)
-    return (tensor * std + mean) * 255.0
+    return (tensor * std + mean) 
 
 # Denormalization values
 mean = [1370.19151926, 1184.3824625, 1120.77120066, 1136.26026392,
