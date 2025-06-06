@@ -247,7 +247,9 @@ def main(args):
                 # Forward pass for reconstruction
                 latent, mask, ids_restore = model.forward_encoder(vis_images, mask_ratio=args.mask_ratio)
                 pred = model.forward_decoder(latent, ids_restore)  # predicted patches
-                p = (args.input_size // args.patch_size) ** 2  # total number of patches per group
+                h = w = args.input_size // args.patch_size
+                p = h * w
+                # p = (args.input_size // args.patch_size) ** 2  # total number of patches per group
                 c = [len(group) for group in args.grouped_bands]  # e.g., [4, 4, 2] or similar
 
                 reconstructed = model.unpatchify(pred, p=p, c=c).detach()  # full image
