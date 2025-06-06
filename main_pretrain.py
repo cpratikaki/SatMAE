@@ -24,7 +24,7 @@ import timm.optim.optim_factory as optim_factory
 import util.misc as misc
 from util.datasets import build_fmow_dataset
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
-
+from util.visualize import visualize_grouped_reconstructions
 import models_mae
 import models_mae_group_channels
 import models_mae_temporal
@@ -130,10 +130,14 @@ def main(args):
     torch.manual_seed(seed)
     np.random.seed(seed)
 
+    
+
     cudnn.benchmark = True
 
     dataset_train = build_fmow_dataset(is_train=True, args=args)
     print(dataset_train)
+    # Select 4 fixed images for visualization
+
 
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
@@ -158,6 +162,10 @@ def main(args):
         pin_memory=args.pin_mem,
         drop_last=True,
     )
+    # Select 4 fixed images for visualization
+    vis_batch = next(iter(data_loader_train))
+    vis_images = vis_batch[0][:4].to(device)  # assume vis_batch = (images, labels)
+
 
     # define the model
     if args.model_type == 'group_c':
@@ -233,6 +241,16 @@ def main(args):
                 log_writer=log_writer,
                 args=args
             )
+        if epoch % 2 == 0:
+            model.eval()
+            with torch.no_grad():
+                # Forward pass for reconstruction
+                latent, mask, ids_restore = model.forward_encoder(vis_images, mask_ratio=args.mask_ratio)
+                pred = model.forward_decoder(latent, ids_restore)  # predicted patches
+                reconstructed = model.unpatchify(pred).detach()    # full image
+
+            visualize_grouped_reconstructions(vis_images, reconstructed, epoch, args)
+            model.train()
 
         if args.output_dir and (epoch % 5 == 0 or epoch + 1 == args.epochs):
             misc.save_model(
