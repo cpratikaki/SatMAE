@@ -244,20 +244,23 @@ def main(args):
         if epoch % 2 == 0:
             model.eval()
             with torch.no_grad():
-                # Forward pass for reconstruction
+                # Forward pass
                 latent, mask, ids_restore = model.forward_encoder(vis_images, mask_ratio=args.mask_ratio)
-                pred = model.forward_decoder(latent, ids_restore)  # predicted patches
-                h = w = args.input_size // args.patch_size
-                p = h * w
-                # p = (args.input_size // args.patch_size) ** 2  # total number of patches per group
-                c = [len(group) for group in args.grouped_bands]  # e.g., [4, 4, 2] or similar
-                print("p,c", p ,c)
-                print(pred.shape, 'PRED SHAPE')
+                pred = model.forward_decoder(latent, ids_restore)  # shape: (B, C, L, P²)
 
-                reconstructed = model.unpatchify(pred, p=p, c=c).detach()  # full image
+                # Reshape pred to match expected input of unpatchify
+                B, C, L, P2 = pred.shape
+                pred_reshaped = pred.permute(0, 2, 1, 3).reshape(B, L, C * P2)
+
+                p = args.patch_size  # patch size, not number of patches
+                c = sum([len(group) for group in args.grouped_bands])  # total input channels
+
+                # Unpatchify
+                reconstructed = model.unpatchify(pred_reshaped, p=p, c=c).detach()
 
             visualize_grouped_reconstructions(vis_images, reconstructed, epoch, args)
             model.train()
+
 
         if args.output_dir and (epoch % 5 == 0 or epoch + 1 == args.epochs):
             misc.save_model(
