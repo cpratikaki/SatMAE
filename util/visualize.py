@@ -94,8 +94,8 @@ def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_
         vutils.save_image(nir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir.png"))
         swir_grid = vutils.make_grid([swir_orig, swir_recon], nrow=2, normalize=True)
         vutils.save_image(swir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir.png"))
-        stacked = torch.cat(panels, dim=1)
-        imgs.append(stacked)
+        # stacked = torch.cat(panels, dim=1)
+        # imgs.append(stacked)
 
     # grid = vutils.make_grid(imgs, nrow=1, normalize=True)
 
