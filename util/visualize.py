@@ -31,12 +31,18 @@ def visualize_grouped_reconstructions(original, reconstructed, epoch, args, log_
         print(panels[0].shape)
         print(panels[1].shape)
         print(panels[2].shape)
+        rgb_grid = vutils.make_grid([rgb_orig, rgb_recon], nrow=2, normalize=True)
+        vutils.save_image(rgb_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_rgb.png"))
+        nir_grid = vutils.make_grid([nir_orig, nir_recon], nrow=2, normalize=True)
+        vutils.save_image(nir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_nir.png"))
+        swir_grid = vutils.make_grid([swir_orig, swir_recon], nrow=2, normalize=True)
+        vutils.save_image(swir_grid, os.path.join(args.output_dir, f"epoch{epoch}_img{i}_swir.png"))
         # Stack vertically: RGB, NIR, SWIR (all on CPU)
-        stacked = torch.cat(panels, dim=1)
-        imgs.append(stacked)
+    #     stacked = torch.cat(panels, dim=1)
+    #     imgs.append(stacked)
 
-    grid = vutils.make_grid(imgs, nrow=1, normalize=True)
+    # grid = vutils.make_grid(imgs, nrow=1, normalize=True)
 
 
-    if args.output_dir:
-        vutils.save_image(grid, os.path.join(args.output_dir, f"recon_epoch_{epoch}.png"))
+    # if args.output_dir:
+    #     vutils.save_image(grid, os.path.join(args.output_dir, f"recon_epoch_{epoch}.png"))
